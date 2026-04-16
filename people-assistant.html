@@ -285,7 +285,7 @@ var PROMPTS = [
   'How do I onboard a new hire?'
 ];
 
-var history = [];
+var chatHistory = [];
 var isLoading = false;
 
 function buildPromptChips() {
@@ -439,7 +439,7 @@ async function sendMessage() {
   document.getElementById('sendBtn').disabled = true;
 
   addMessage('user', text);
-  history.push({ role: 'user', content: text });
+  chatHistory.push({ role: 'user', content: text });
 
   showTyping();
 
@@ -451,7 +451,7 @@ async function sendMessage() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
         system: SYSTEM_PROMPT,
-        messages: history
+        messages: chatHistory
       })
     });
 
@@ -462,7 +462,7 @@ async function sendMessage() {
 
     if (data && data.content && data.content[0] && data.content[0].text) {
       var reply = data.content[0].text;
-      history.push({ role: 'assistant', content: reply });
+      chatHistory.push({ role: 'assistant', content: reply });
       addMessage('assistant', reply);
     } else {
       var errorDetail = data ? JSON.stringify(data) : rawText;
