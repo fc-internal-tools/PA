@@ -46,6 +46,13 @@ body {
   min-height: 100vh;
 }
 
+/* Remove top padding when embedded in iframe */
+@media (max-height: 950px) {
+  .site-header { padding: 1.25rem 0 1rem; }
+  .hero { padding: 0 0 1.25rem; }
+  .hero-headline { font-size: 42px; margin-bottom: 0.85rem; }
+}
+
 /* HEADER */
 .site-header { padding: 2rem 0 1.75rem; display: flex; align-items: center; }
 .logo-svg { height: 28px; width: auto; flex-shrink: 0; }
@@ -465,12 +472,11 @@ async function sendMessage() {
       chatHistory.push({ role: 'assistant', content: reply });
       addMessage('assistant', reply);
     } else {
-      var errorDetail = data ? JSON.stringify(data) : rawText;
-      addMessage('assistant', 'Error: ' + errorDetail);
+      addMessage('assistant', 'Something went wrong on my end. Try again or bring this to Thursday\u2019s People Call.');
     }
   } catch (err) {
     hideTyping();
-    addMessage('assistant', 'Connection error: ' + err.message);
+    addMessage('assistant', 'Couldn\u2019t connect right now. Check your internet and try again.');
   }
 
   isLoading = false;
