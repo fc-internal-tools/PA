@@ -27,6 +27,9 @@ html { scroll-behavior: smooth; }
   --c-amber:        #9E6800;
   --c-amber-bg:     #FDF3DC;
   --c-amber-border: rgba(158,104,0,0.15);
+  --c-blue:        #1a5fa8;
+  --c-blue-bg:     #e8f0fb;
+  --c-blue-border: rgba(26,95,168,0.15);
 }
 body {
   min-height: 100vh;
@@ -46,17 +49,31 @@ body {
   min-height: 100vh;
 }
 
-/* Remove top padding when embedded in iframe */
-@media (max-height: 950px) {
-  .site-header { padding: 1.25rem 0 1rem; }
-  .hero { padding: 0 0 1.25rem; }
-  .hero-headline { font-size: 42px; margin-bottom: 0.85rem; }
-}
-
 /* HEADER */
 .site-header { padding: 1.25rem 0 1rem; display: flex; align-items: center; }
 .logo-svg { height: 24px; width: auto; flex-shrink: 0; }
 .header-rule { flex: 1; height: 1px; background: var(--border-med); margin-left: 1.5rem; }
+
+/* MODE BADGE */
+.mode-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-left: 1rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.mode-badge.visible { display: flex; }
+.mode-badge.jobad { background: var(--c-blue-bg); color: var(--c-blue); border: 1px solid var(--c-blue-border); }
+.mode-badge.sop { background: var(--c-teal-bg); color: var(--c-teal); border: 1px solid var(--c-teal-border); }
+.mode-badge.hrletter { background: var(--c-amber-bg); color: var(--c-amber); border: 1px solid var(--c-amber-border); }
+.mode-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 /* HERO */
 .hero { padding: 0 0 1.25rem; }
@@ -148,12 +165,18 @@ body {
   font-weight: 400;
 }
 
+/* Mode-specific assistant bubble tint */
+.msg.assistant.mode-jobad .msg-bubble { border-color: var(--c-blue-border); }
+.msg.assistant.mode-sop .msg-bubble { border-color: var(--c-teal-border); }
+.msg.assistant.mode-hrletter .msg-bubble { border-color: var(--c-amber-border); }
+
 /* RESPONSE FORMATTING */
 .msg-bubble p { margin-bottom: 0.6rem; }
 .msg-bubble p:last-child { margin-bottom: 0; }
 .msg-bubble ul, .msg-bubble ol { padding-left: 1.25rem; margin-bottom: 0.6rem; }
 .msg-bubble li { margin-bottom: 0.3rem; }
 .msg-bubble strong { font-weight: 500; color: var(--black); }
+.msg-bubble h3 { font-family: 'Khand', sans-serif; font-size: 16px; font-weight: 600; margin: 0.75rem 0 0.35rem; color: var(--black); }
 .msg-bubble .fc-class {
   display: inline-block; margin-top: 0.75rem;
   font-size: 12px; font-weight: 500;
@@ -166,6 +189,32 @@ body {
   background: var(--c-amber-bg); border: 1px solid var(--c-amber-border);
   border-radius: 8px; font-size: 12px; color: var(--c-amber); line-height: 1.65;
 }
+.msg-bubble .ad-output {
+  margin-top: 0.75rem;
+  background: #fff;
+  border: 1px solid var(--border-med);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  position: relative;
+}
+.msg-bubble .ad-output-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--c-blue);
+  margin-bottom: 0.5rem; display: block;
+}
+.copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  padding: 4px 10px; font-size: 11px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream2); border: 1px solid var(--border-med);
+  border-radius: 6px; cursor: pointer; color: var(--muted);
+  transition: all 0.15s;
+}
+.copy-btn:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--black); }
+.copy-btn.copied { background: var(--c-teal-bg); border-color: var(--c-teal-border); color: var(--c-teal); }
 
 /* TYPING INDICATOR */
 .typing-wrap { display: flex; gap: 10px; animation: fadeUp 0.3s both; }
@@ -180,9 +229,7 @@ body {
 @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
 
 /* WELCOME MESSAGE */
-.welcome-msg {
-  text-align: center; padding: 2.5rem 1rem; color: var(--muted);
-}
+.welcome-msg { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
 .welcome-icon { font-size: 32px; margin-bottom: 0.75rem; }
 .welcome-text { font-size: 14px; line-height: 1.7; font-weight: 300; }
 
@@ -219,15 +266,14 @@ textarea::placeholder { color: var(--muted); font-weight: 300; }
 /* DISCLAIMER */
 .disclaimer {
   text-align: center; font-size: 11px; color: var(--muted);
-  font-weight: 300; line-height: 1.6; padding: 0.5rem 0;
-  opacity: 0.7;
+  font-weight: 300; line-height: 1.6; padding: 0.5rem 0; opacity: 0.7;
 }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 600px) {
-  .hero-headline { font-size: 38px; }
-  .hero-sub { font-size: 14px; }
+  .hero-headline { font-size: 32px; }
+  .hero-sub { font-size: 13px; }
   .prompt-chips { gap: 6px; }
   .prompt-chip { font-size: 12px; padding: 7px 13px; }
 }
@@ -240,6 +286,10 @@ textarea::placeholder { color: var(--muted); font-weight: 300; }
   <div class="site-header">
     <svg class="logo-svg" viewBox="0 0 457 54" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(1.3333333,0,0,-1.3333333,0,53.716667)"><defs><clipPath id="fcc"><path d="M 0,40.288 H 343.057 V 0 H 0 Z"/></clipPath></defs><g clip-path="url(#fcc)"><path d="M 18.66,21.613 H 17.677 V 18.64 h 0.983 z m 4.276,5.79 h 2.909 v 2.062 c -1.094,-0.523 -2.046,-1.19 -2.909,-2.062 m -5.263,-4.479 c 0.404,0 0.782,-0.007 1.16,0.008 0.056,0.002 0.139,0.098 0.158,0.166 0.268,0.985 0.652,1.922 1.156,2.808 0.028,0.048 0.045,0.101 0.07,0.157 h -2.544 z m 5.486,-4.284 c -0.206,1 -0.197,1.983 -0.004,2.975 h -3.123 c -0.143,-0.997 -0.15,-1.982 0.003,-2.975 z m -6.812,7.424 h -2.952 v -3.123 h 2.952 z m 9.738,-0.006 c -0.084,0.012 -0.113,0.021 -0.141,0.021 -1.329,0 -2.658,0.003 -3.986,-0.005 -0.08,-0.001 -0.188,-0.066 -0.231,-0.134 -0.242,-0.385 -0.498,-0.766 -0.693,-1.174 -0.278,-0.585 -0.507,-1.194 -0.762,-1.802 0.087,-0.025 0.108,-0.037 0.128,-0.037 1.01,-0.002 2.02,-0.006 3.03,0.004 0.07,0.001 0.163,0.087 0.205,0.157 0.258,0.428 0.48,0.879 0.76,1.291 0.441,0.651 1.011,1.187 1.69,1.679 m -1.425,4.293 h -6.983 v -2.954 c 0.048,-0.004 0.084,-0.01 0.12,-0.01 1.071,0 2.142,-0.004 3.212,0.006 0.088,0.001 0.2,0.065 0.258,0.135 0.904,1.083 1.963,1.982 3.184,2.69 0.055,0.033 0.109,0.069 0.209,0.133 M 13.395,9.89 h 2.948 v 7.421 h -2.948 z m 21.718,15.638 c 0.776,0.654 1.555,1.311 2.349,1.982 -1.605,1.534 -3.471,2.479 -5.633,2.823 -1.583,0.252 -3.14,0.132 -4.661,-0.35 v -3.27 c 2.885,1.171 5.529,0.803 7.945,-1.185 M 20.329,17.313 c 0.858,-3.215 3.672,-6.513 7.959,-7.321 3.5,-0.659 6.542,0.338 9.186,2.744 -0.814,0.686 -1.589,1.34 -2.371,2 -0.119,-0.097 -0.223,-0.185 -0.329,-0.269 -1.628,-1.287 -3.486,-1.813 -5.527,-1.508 -2.592,0.386 -4.452,1.817 -5.59,4.177 -0.072,0.149 -0.152,0.192 -0.307,0.191 -0.935,-0.007 -1.87,-0.003 -2.804,-0.004 -0.067,0 -0.134,-0.005 -0.217,-0.01 M 39.354,12.869 C 38.298,11.59 37.073,10.564 35.626,9.81 33.663,8.787 31.574,8.353 29.373,8.522 c -2.741,0.212 -5.121,1.274 -7.122,3.161 -1.602,1.511 -2.68,3.341 -3.252,5.468 -0.028,0.105 -0.053,0.177 -0.186,0.175 -0.372,-0.007 -0.744,-0.003 -1.144,-0.003 v -8.72 h -5.586 v 10.022 h 4.262 v 2.997 h -4.26 v 5.757 h 4.266 v 4.276 h 10.794 c 0.008,-0.095 0.015,-0.185 0.022,-0.268 4.852,1.091 8.897,-0.253 12.209,-3.983 -1.469,-1.239 -2.911,-2.456 -4.362,-3.681 -0.201,0.211 -0.386,0.411 -0.578,0.603 -2.869,2.869 -7.707,2.069 -9.502,-1.575 -0.055,-0.111 -0.087,-0.245 -0.087,-0.369 -0.006,-1.504 -0.006,-3.009 0,-4.514 0,-0.124 0.034,-0.257 0.089,-0.368 1.834,-3.726 6.846,-4.453 9.663,-1.405 0.133,0.144 0.27,0.286 0.414,0.437 1.448,-1.221 2.886,-2.435 4.341,-3.663" fill="#3b4443" fill-rule="nonzero"/><text transform="matrix(1,0,0,-1,46.7861,9.1406)" style="font-size:30.6746px;font-family:'Brandon Grotesque','Futura','Century Gothic','DM Sans',sans-serif;font-weight:500;fill:#3b4443;">FOODIE </text><text transform="matrix(1,0,0,-1,178.16541,9.1406)" style="font-size:30.6746px;font-family:'Brandon Grotesque','Futura','Century Gothic','DM Sans',sans-serif;font-weight:800;fill:#3b4443;">COACHES</text></g></g></svg>
     <div class="header-rule"></div>
+    <div class="mode-badge" id="modeBadge">
+      <div class="mode-badge-dot"></div>
+      <span id="modeBadgeLabel"></span>
+    </div>
   </div>
 
   <!-- HERO -->
@@ -247,8 +297,7 @@ textarea::placeholder { color: var(--muted); font-weight: 300; }
     <div class="hero-eyebrow">People Assistant</div>
     <h1 class="hero-headline">Your <em>team</em> questions,<br>answered.</h1>
     <div class="intro-divider"></div>
-    <p class="hero-sub">Ask anything about hiring, performance, onboarding, culture, or difficult conversations. Grounded in FC frameworks and real member Q&amp;As.</p>
-
+    <p class="hero-sub">Ask anything about hiring, performance, onboarding, culture, or difficult conversations. Grounded in FC frameworks and real member Q&As.</p>
     <div class="prompts-label">Try asking about</div>
     <div class="prompt-chips" id="promptChips"></div>
   </div>
@@ -279,22 +328,68 @@ textarea::placeholder { color: var(--muted); font-weight: 300; }
 </div>
 
 <script>
-var SYSTEM_PROMPT = 'You are the Foodie Coaches People Assistant \u2014 a practical coaching tool for hospitality venue owners across Australia, New Zealand, and the US.\n\nYour job is to help with real people and team situations quickly and without fluff. Give grounded advice based on Foodie Coaches frameworks and class content.\n\nTONE: Direct and practical. No corporate speak. Warm but not soft. Conversational. No em dashes. No filler phrases. Just answer.\n\nFORMAT: Use dot points for action steps. Bold key things with **text**. Reference FC classes at the end like: \u2192 FC Class: Performance Management 101. Keep responses tight.\n\nLEGAL GUARDRAIL: For anything touching termination, redundancy, formal complaints, underpayment, awards, or employment law \u2014 give framework guidance then add a note directing them to consult their relevant employment governing body or industry association for country-specific legal advice. Never give legal advice.\n\nCORE FC FRAMEWORKS:\n- Fact-finding conversation: casual check-in before any performance conversation\n- Why-stack: ask why repeatedly to get to the real issue\n- Start/Stop/Keep: self-reflection peer assessment, compare separately\n- 5-step delegation: What / Why business / Why them / Action steps / Follow-up\n- Deposits and withdrawals: positives must outweigh criticals\n- Skill vs Will: training problem or motivation problem?\n- Hire/Hold/No: decide immediately after every interview\n- DISC types: D=direct, I=people, S=steady, C=detail\n\nFC CLASSES: Reset Meeting, Performance Management 101, Aligning Expectations, Effective Onboarding, Staffing Spectrum, Skills Matrix, High Functioning Teams, Culture Campfire, Delegation Equation, Effective KPI Blueprint, Bonuses & Incentives, Designing & Delivering Your Vision, Recruit with Intention, How to Write Job Ads, How to Write Job Descriptions, How to Write a Staff Manual, EQ: Building EQ as a Leader, EQ: Decision Making, EQ: How I View Myself, EQ: How I Communicate.\n\nIf outside your knowledge: say it\u2019s worth bringing to Thursday\u2019s People Call or their FC coach.';
+// ============================================================
+// CONFIG
+// ============================================================
+var WORKER_URL = 'https://pa.samuel-robertson.workers.dev';
+var MODEL = 'claude-sonnet-4-20250514';
+var MAX_TOKENS = 1200;
 
 var PROMPTS = [
-  'My staff member isn\u2019t performing',
+  'My staff member isn\'t performing',
   'I need to let someone go',
   'My culture has slipped',
   'I have a difficult conversation coming up',
   'I need to hire someone',
-  'My staff won\u2019t upsell',
-  'My manager isn\u2019t stepping up',
-  'How do I onboard a new hire?'
+  'Write me a job ad',
+  'My staff won\'t upsell',
+  'My manager isn\'t stepping up'
 ];
 
-var chatHistory = [];
-var isLoading = false;
+// Mode labels shown in the badge
+var MODE_LABELS = {
+  pa:       null,
+  jobad:    'Job Ad Generator',
+  sop:      'Document Builder',
+  hrletter: 'HR Letter Generator'
+};
 
+// ============================================================
+// STATE
+// ============================================================
+var chatHistory  = [];
+var currentMode  = 'pa';
+var isLoading    = false;
+
+// ============================================================
+// MODE MANAGEMENT
+// ============================================================
+function setMode(mode) {
+  currentMode = mode;
+  var badge     = document.getElementById('modeBadge');
+  var badgeLabel = document.getElementById('modeBadgeLabel');
+  var label     = MODE_LABELS[mode];
+
+  if (label) {
+    badge.className = 'mode-badge visible ' + mode;
+    badgeLabel.textContent = label;
+  } else {
+    badge.className = 'mode-badge';
+  }
+}
+
+// Detect [MODE:X] tag in AI response, return { mode, cleanText }
+function detectModeSwitch(text) {
+  var match = text.match(/\[MODE:(PA|JOBAD|SOP|HRLETTER)\]/i);
+  if (!match) return { mode: null, cleanText: text };
+  var mode = match[1].toLowerCase();
+  var cleanText = text.replace(match[0], '').trim();
+  return { mode: mode, cleanText: cleanText };
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
 function buildPromptChips() {
   var wrap = document.getElementById('promptChips');
   PROMPTS.forEach(function(p) {
@@ -318,6 +413,11 @@ function autoResize(el) {
   el.style.height = Math.min(el.scrollHeight, 160) + 'px';
 }
 
+function scrollToBottom() {
+  var msgs = document.getElementById('messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
 function escapeHtml(str) {
   return str
     .replace(/&/g, '&amp;')
@@ -325,7 +425,53 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
+// ============================================================
+// RESPONSE FORMATTER
+// ============================================================
 function formatResponse(text) {
+  // Split into sections: look for OUTPUT 1 / OUTPUT 2 / SEEK AD / FACEBOOK markers
+  var adMarkers = /###\s*(OUTPUT\s*[12]|SEEK AD|FACEBOOK[^\n]*|FB[^\n]*BLURB[^\n]*)/gi;
+  var hasAdOutput = adMarkers.test(text);
+
+  if (hasAdOutput) {
+    return formatAdOutput(text);
+  }
+  return formatStandard(text);
+}
+
+function formatAdOutput(text) {
+  var html = '';
+  // Split on ### headings
+  var parts = text.split(/(###[^\n]+)/g);
+
+  parts.forEach(function(part) {
+    if (part.match(/^###/)) {
+      var heading = part.replace(/^###\s*/, '').trim();
+      html += '<h3>' + escapeHtml(heading) + '</h3>';
+    } else if (part.trim()) {
+      // Check if this looks like an ad block (after a heading)
+      var prev = parts[parts.indexOf(part) - 1] || '';
+      if (prev.match(/###/)) {
+        html += renderAdBlock(part.trim());
+      } else {
+        html += formatStandard(part.trim());
+      }
+    }
+  });
+  return html;
+}
+
+function renderAdBlock(text) {
+  var label = text.match(/SEEK|Seek/i) ? 'Seek Ad' :
+              text.match(/Facebook|FB|Blurb/i) ? 'Facebook Blurb' : 'Ad Output';
+  return '<div class="ad-output">' +
+    '<button class="copy-btn" onclick="copyAdText(this)">Copy</button>' +
+    '<span class="ad-output-label">' + escapeHtml(label) + '</span>' +
+    escapeHtml(text) +
+    '</div>';
+}
+
+function formatStandard(text) {
   var lines = text.split('\n');
   var html = '';
   var inList = false;
@@ -338,17 +484,24 @@ function formatResponse(text) {
     }
 
     // FC class references
-    if (trimmed.indexOf('\u2192 FC Class') === 0 || trimmed.indexOf('-> FC Class') === 0 || trimmed.indexOf('\u2192 FC Classes') === 0) {
+    if (trimmed.indexOf('-> FC Class') === 0 || trimmed.indexOf('\u2192 FC Class') === 0) {
       if (inList) { html += '</ul>'; inList = false; }
       html += '<span class="fc-class">' + escapeHtml(trimmed) + '</span>';
       return;
     }
 
-    // Legal note
+    // Legal / important note
     if (trimmed.indexOf('Important:') === 0 || trimmed.indexOf('**Important:**') === 0) {
       if (inList) { html += '</ul>'; inList = false; }
       var noteText = trimmed.replace(/\*\*/g, '');
       html += '<div class="legal-note">' + escapeHtml(noteText) + '</div>';
+      return;
+    }
+
+    // H3 headings
+    if (trimmed.indexOf('### ') === 0) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<h3>' + escapeHtml(trimmed.replace('### ', '')) + '</h3>';
       return;
     }
 
@@ -362,8 +515,6 @@ function formatResponse(text) {
     }
 
     if (inList) { html += '</ul>'; inList = false; }
-
-    // Bold formatting
     var formatted = trimmed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html += '<p>' + formatted + '</p>';
   });
@@ -372,18 +523,34 @@ function formatResponse(text) {
   return html;
 }
 
-function scrollToBottom() {
-  var msgs = document.getElementById('messages');
-  msgs.scrollTop = msgs.scrollHeight;
+function copyAdText(btn) {
+  var block = btn.parentElement;
+  // Get text content minus the label span and button
+  var label = block.querySelector('.ad-output-label');
+  var text = block.textContent
+    .replace(btn.textContent, '')
+    .replace(label ? label.textContent : '', '')
+    .trim();
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
 }
 
-function addMessage(role, content) {
+// ============================================================
+// CHAT
+// ============================================================
+function addMessage(role, content, modeClass) {
   var welcome = document.getElementById('welcomeMsg');
   if (welcome) welcome.remove();
 
   var msgs = document.getElementById('messages');
   var msgDiv = document.createElement('div');
-  msgDiv.className = 'msg ' + role;
+  msgDiv.className = 'msg ' + role + (modeClass ? ' mode-' + modeClass : '');
 
   var avatarDiv = document.createElement('div');
   avatarDiv.className = 'msg-avatar';
@@ -451,32 +618,55 @@ async function sendMessage() {
   showTyping();
 
   try {
-    var response = await fetch('https://pa.samuel-robertson.workers.dev', {
+    var response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        mode: currentMode,
         messages: chatHistory
       })
     });
 
-    var rawText = await response.text();
-    var data;
-    try { data = JSON.parse(rawText); } catch(e) { data = null; }
+    var data = await response.json();
     hideTyping();
 
     if (data && data.content && data.content[0] && data.content[0].text) {
-      var reply = data.content[0].text;
-      chatHistory.push({ role: 'assistant', content: reply });
-      addMessage('assistant', reply);
+      var rawReply = data.content[0].text;
+
+      // Check for mode switch signal
+      var detected = detectModeSwitch(rawReply);
+      var displayText = detected.cleanText;
+      var newMode = detected.mode;
+
+      // If switching TO a specialist mode, don't add a visible message — the next
+      // AI response (from the specialist) will open the conversation
+      if (newMode && newMode !== 'pa') {
+        setMode(newMode);
+        chatHistory.push({ role: 'assistant', content: rawReply });
+        // Now make an opening call to the specialist
+        await callSpecialistOpener();
+      } else if (newMode === 'pa') {
+        // Returning to PA mode
+        setMode('pa');
+        if (displayText) {
+          chatHistory.push({ role: 'assistant', content: rawReply });
+          addMessage('assistant', displayText);
+        }
+      } else {
+        // Normal response, no mode switch
+        chatHistory.push({ role: 'assistant', content: rawReply });
+        addMessage('assistant', rawReply, currentMode !== 'pa' ? currentMode : null);
+      }
+
     } else {
-      addMessage('assistant', 'Something went wrong on my end. Try again or bring this to Thursday\u2019s People Call.');
+      addMessage('assistant', 'Something went wrong on my end. Try again or bring this to Thursday\'s People Call.');
     }
+
   } catch (err) {
     hideTyping();
-    addMessage('assistant', 'Couldn\u2019t connect right now. Check your internet and try again.');
+    addMessage('assistant', 'Couldn\'t connect right now. Check your internet and try again.');
   }
 
   isLoading = false;
@@ -484,7 +674,39 @@ async function sendMessage() {
   input.focus();
 }
 
-// Enter to send, shift+enter for new line
+// Called when mode switches to a specialist — sends empty opener so specialist greets the user
+async function callSpecialistOpener() {
+  showTyping();
+  try {
+    var response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        mode: currentMode,
+        messages: chatHistory
+      })
+    });
+
+    var data = await response.json();
+    hideTyping();
+
+    if (data && data.content && data.content[0] && data.content[0].text) {
+      var reply = data.content[0].text;
+      var detected = detectModeSwitch(reply);
+      chatHistory.push({ role: 'assistant', content: reply });
+      addMessage('assistant', detected.cleanText || reply, currentMode);
+    }
+  } catch (err) {
+    hideTyping();
+    addMessage('assistant', 'Couldn\'t start that tool. Try again in a moment.');
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
 document.getElementById('userInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
