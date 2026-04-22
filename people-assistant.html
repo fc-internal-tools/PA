@@ -98,7 +98,7 @@ body {
   text-transform: uppercase; color: var(--muted);
   margin-bottom: 0.5rem; margin-top: 1rem;
 }
-.prompt-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+.prompt-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
 .prompt-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 16px; font-size: 13px; font-weight: 400;
@@ -108,6 +108,30 @@ body {
   cursor: pointer; transition: all 0.15s; user-select: none;
 }
 .prompt-chip:hover { border-color: var(--gold); background: var(--gold-dim); color: var(--black); }
+
+/* TOOL CHIPS */
+.tool-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+.tool-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px 8px 10px; font-size: 13px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  border-radius: 50px; cursor: pointer; transition: all 0.15s; user-select: none;
+  border: 1px solid transparent;
+}
+.tool-chip-icon {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+.tool-chip.jobad { color: var(--c-blue); background: var(--c-blue-bg); border-color: var(--c-blue-border); }
+.tool-chip.jobad .tool-chip-icon { background: var(--c-blue); color: #fff; }
+.tool-chip.jobad:hover { background: #d4e4f7; border-color: var(--c-blue); }
+.tool-chip.sop { color: var(--c-teal); background: var(--c-teal-bg); border-color: var(--c-teal-border); }
+.tool-chip.sop .tool-chip-icon { background: var(--c-teal); color: #fff; }
+.tool-chip.sop:hover { background: #ceeee7; border-color: var(--c-teal); }
+.tool-chip.hrletter { color: var(--c-amber); background: var(--c-amber-bg); border-color: var(--c-amber-border); }
+.tool-chip.hrletter .tool-chip-icon { background: var(--c-amber); color: #fff; }
+.tool-chip.hrletter:hover { background: #fae8b8; border-color: var(--c-amber); }
 
 /* CHAT WINDOW */
 .chat-window {
@@ -276,6 +300,8 @@ textarea::placeholder { color: var(--muted); font-weight: 300; }
   .hero-sub { font-size: 13px; }
   .prompt-chips { gap: 6px; }
   .prompt-chip { font-size: 12px; padding: 7px 13px; }
+  .tool-chips { gap: 6px; }
+  .tool-chip { font-size: 12px; padding: 7px 12px 7px 8px; }
 }
 </style>
 </head>
@@ -298,7 +324,9 @@ textarea::placeholder { color: var(--muted); font-weight: 300; }
     <h1 class="hero-headline">Your <em>team</em> questions,<br>answered.</h1>
     <div class="intro-divider"></div>
     <p class="hero-sub">Ask anything about hiring, performance, onboarding, culture, or difficult conversations. Grounded in FC frameworks and real member Q&As.</p>
-    <div class="prompts-label">Try asking about</div>
+    <div class="prompts-label">Build a document</div>
+    <div class="tool-chips" id="toolChips"></div>
+    <div class="prompts-label">Common situations</div>
     <div class="prompt-chips" id="promptChips"></div>
   </div>
 
@@ -335,15 +363,18 @@ var WORKER_URL = 'https://pa.samuel-robertson.workers.dev';
 var MODEL = 'claude-sonnet-4-20250514';
 var MAX_TOKENS = 1200;
 
-var PROMPTS = [
+var SITUATION_CHIPS = [
   'My staff member isn\'t performing',
+  'My manager isn\'t stepping up',
   'I need to let someone go',
   'My culture has slipped',
-  'I have a difficult conversation coming up',
-  'I need to hire someone',
-  'Write me a job ad',
-  'My staff won\'t upsell',
-  'My manager isn\'t stepping up'
+  'I have a difficult conversation coming up'
+];
+
+var TOOL_CHIPS = [
+  { label: 'Write a job ad',          mode: 'jobad',    icon: '✦' },
+  { label: 'Build SOPs & training docs', mode: 'sop',   icon: '✦' },
+  { label: 'Draft an HR letter',      mode: 'hrletter', icon: '✦' }
 ];
 
 // Mode labels shown in the badge
@@ -391,14 +422,73 @@ function detectModeSwitch(text) {
 // UI HELPERS
 // ============================================================
 function buildPromptChips() {
-  var wrap = document.getElementById('promptChips');
-  PROMPTS.forEach(function(p) {
+  // Tool chips — direct mode launch, no confirmation step
+  var toolWrap = document.getElementById('toolChips');
+  TOOL_CHIPS.forEach(function(t) {
+    var chip = document.createElement('div');
+    chip.className = 'tool-chip ' + t.mode;
+    chip.innerHTML = '<div class="tool-chip-icon">' + t.icon + '</div>' + t.label;
+    chip.onclick = function() { launchToolDirectly(t.mode, t.label); };
+    toolWrap.appendChild(chip);
+  });
+
+  // Situation chips — fill the textarea as before
+  var sitWrap = document.getElementById('promptChips');
+  SITUATION_CHIPS.forEach(function(p) {
     var chip = document.createElement('div');
     chip.className = 'prompt-chip';
     chip.textContent = p;
     chip.onclick = function() { fillPrompt(p); };
-    wrap.appendChild(chip);
+    sitWrap.appendChild(chip);
   });
+}
+
+// Launch a specialist tool directly — skips PA confirmation step
+async function launchToolDirectly(mode, label) {
+  if (isLoading) return;
+
+  setMode(mode);
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  // Add a user message so context makes sense
+  var userText = label;
+  addMessage('user', userText);
+  chatHistory.push({ role: 'user', content: userText });
+
+  showTyping();
+
+  try {
+    var response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        mode: mode,
+        messages: chatHistory
+      })
+    });
+
+    var data = await response.json();
+    hideTyping();
+
+    if (data && data.content && data.content[0] && data.content[0].text) {
+      var reply = data.content[0].text;
+      var detected = detectModeSwitch(reply);
+      chatHistory.push({ role: 'assistant', content: reply });
+      addMessage('assistant', detected.cleanText || reply, mode);
+    } else {
+      addMessage('assistant', 'Something went wrong. Try again in a moment.');
+    }
+  } catch (err) {
+    hideTyping();
+    addMessage('assistant', 'Couldn\'t connect right now. Check your internet and try again.');
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('userInput').focus();
 }
 
 function fillPrompt(text) {
